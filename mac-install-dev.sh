@@ -11,7 +11,7 @@ if ! command -v brew &> /dev/null; then
   # Add Homebrew to PATH for Apple Silicon
   echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
   eval "$(/opt/homebrew/bin/brew shellenv)"
-else 
+else
   echo "Homebrew already installed."
 fi
 
@@ -46,7 +46,7 @@ NVIM_CONFIG_REPO_URL="git@github.com:mbuyco/nvim-config-lua.git"
 SUCCESS_MESSAGE="Neovim configuration successfully installed at $NVIM_CONFIG_DIR."
 if [ -d "$NVIM_CONFIG_DIR" ]; then
   read -p "Neovim config already exists at $NVIM_CONFIG_DIR. Delete and replace? (y/N): " confirm
-  confirm=${confirm,,} # lowercase
+  confirm=$(echo "$confirm" | tr '[:upper:]' '[:lower:]')
   if [[ "$confirm" == "y" || "$confirm" == "yes" ]]; then
     echo "Deleting existing config..."
     rm -rf "$NVIM_CONFIG_DIR"
@@ -60,6 +60,41 @@ else
   git clone "$NVIM_CONFIG_REPO_URL" "$NVIM_CONFIG_DIR"
   echo "$SUCCESS_MESSAGE"
 fi
+
+echo "=== Installing Dotfiles ==="
+DOTFILES_REPO_URL="git@github.com:mbuyco/dotfiles.git"
+DOTFILES_PATH="$HOME/dotfiles"
+SUCCESS_MESSAGE="Dotfiles successfully installed at $DOTFILES_PATH."
+if [ ! -d "$DOTFILES_PATH" ]; then
+  echo "Cloning dotfiles..."
+  git clone "$DOTFILES_REPO_URL" "$DOTFILES_PATH"
+  echo "$SUCCESS_MESSAGE"
+else
+  echo "Dotfiles already exist, skipping installation..."
+fi
+
+echo "=== Installing ZSH config ==="
+ZSH_CONFIG_SRC="$DOTFILES_PATH/zsh"
+if [ -e "$HOME/.zsh_aliases" ]; then
+  rm "$HOME/.zsh_aliases"
+fi
+if [ -e "$HOME/.zshrc" ]; then
+  rm "$HOME/.zshrc"
+fi
+ln -s "$ZSH_CONFIG_SRC/.zsh_aliases" "$HOME/.zsh_aliases"
+ln -s "$ZSH_CONFIG_SRC/.zshrc" "$HOME/.zshrc"
+
+# Install zsh plugins
+ZSH_AUTOSUGGESTIONS_PLUGIN_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+ZSH_SYNTAX_HIGHLIGHTING_PLUGIN_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+if [ ! -d "$ZSH_AUTOSUGGESTIONS_PLUGIN_PATH" ]; then
+  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_PLUGIN_PATH"
+fi
+if [ ! -d "$ZSH_SYNTAX_HIGHLIGHTING_PLUGIN_PATH" ]; then
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_HIGHLIGHTING_PLUGIN_PATH"
+fi
+
+echo "ZSH config installed successfully"
 
 echo "=== Installation Complete ==="
 echo "Next steps:"
