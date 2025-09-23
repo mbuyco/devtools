@@ -93,8 +93,14 @@ fi
 if [ ! -d "$ZSH_SYNTAX_HIGHLIGHTING_PLUGIN_PATH" ]; then
   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_HIGHLIGHTING_PLUGIN_PATH"
 fi
-
 echo "ZSH config installed successfully"
+
+echo "=== Installing Tmux Configuration ==="
+if [ -e "$HOME/.tmux.conf"]; then
+  rm "$HOME/.tmux.conf"
+fi
+ln -s "$DOTFILES_PATH/tmux/.tmux.conf" "$HOME/.tmux.conf"
+echo "Tmux Configuration installed successfully"
 
 echo "=== Installation Complete ==="
 echo "Next steps:"
