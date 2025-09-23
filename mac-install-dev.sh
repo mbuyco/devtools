@@ -96,11 +96,19 @@ fi
 echo "ZSH config installed successfully"
 
 echo "=== Installing Tmux Configuration ==="
-if [ -e "$HOME/.tmux.conf"]; then
+if [ -e "$HOME/.tmux.conf" ]; then
   rm "$HOME/.tmux.conf"
 fi
 ln -s "$DOTFILES_PATH/tmux/.tmux.conf" "$HOME/.tmux.conf"
 echo "Tmux Configuration installed successfully"
+
+echo "=== Installing OpenCode CLI Agent ==="
+if ! command -v opencode &> /dev/null; then
+  curl -fsSL https://opencode.ai/install | bash
+  echo "OpenCode CLI Agent installed successfully"
+else
+  echo "OpenCode CLI Agent already installed"
+fi
 
 echo "=== Installation Complete ==="
 echo "Next steps:"
