@@ -4,9 +4,15 @@ services:
     build:
       context: .
       args:
+        - DOTFILES_REPO=${DOTFILES_REPO}
         - IMAGE_AUTHOR=${IMAGE_AUTHOR}
+        - NVIM_REPO=${NVIM_REPO}
         - USER_UID=4200
         - USER_GID=4200
     env_file:
       - .env
+    environment:
+      - SSH_AUTH_SOCK=/ssh-agent
+    volumes:
+      - ${SSH_AUTH_SOCK}:/ssh-agent
 

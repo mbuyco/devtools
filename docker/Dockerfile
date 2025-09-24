@@ -1,9 +1,10 @@
-
 # Default platform is `linux/arm64`
 FROM --platform=${BUILDPLATFORM:-linux/arm64} ubuntu:24.04
 
 ARG DEBIAN_FRONTEND
+ARG DOTFILES_REPO
 ARG IMAGE_AUTHOR
+ARG NVIM_REPO
 ARG USER_GID
 ARG USER_UID
 
@@ -53,8 +54,10 @@ RUN NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases \
 # Install essential runtime packages (zsh and tmux)
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-      zsh \
-      tmux \
+    ca-certificates \
+    openssh-client \
+    zsh \
+    tmux \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js LTS (NodeSource) - supports both amd64 and arm64
@@ -78,25 +81,26 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
   && git -C $HOME/.oh-my-zsh pull 2>/dev/null || true \
   && cp -n $HOME/.oh-my-zsh/templates/zshrc.zsh-template $HOME/.zshrc || true
 
+# Install zsh plugins
+RUN git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true \
+  && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true
+
 # Install TPM (tmux plugin manager)
 RUN mkdir -p $HOME/.tmux/plugins \
   && git clone --depth=1 https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm || true
 
-# Add entrypoint script (handles optional cloning of NVIM_REPO)
-COPY --chown=dev:dev entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Clone nvim config
+RUN mkdir -p "$HOME/.config/nvim" \
+  && git clone --depth=1 "$NVIM_REPO" "$HOME/.config/nvim"
 
-# Minimal .tmux.conf to enable tpm (the user's config may replace this when they mount or clone)
-RUN printf "set -g @plugin 'tmux-plugins/tpm'\nset -g @plugin 'tmux-plugins/tmux-sensible'\nrun -b '~/.tmux/plugins/tpm/tpm'\n" > $HOME/.tmux.conf
+# Clone dotfiles
+RUN git clone --depth=1 "$DOTFILES_REPO" "$HOME/dotfiles" \
+  && if [ -f "$HOME/dotfiles/zsh/.zsh_aliases" ]; then cp -f "$HOME/dotfiles/zsh/.zsh_aliases" "$HOME/.zsh_aliases"; fi \
+  && if [ -f "$HOME/dotfiles/zsh/.zshrc" ]; then cp -f "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"; fi \
+  && if [ -f "$HOME/dotfiles/tmux/.tmux.conf" ]; then cp -f "$HOME/dotfiles/tmux/.tmux.conf" "$HOME/.tmux.conf"; fi \
+  && if [ -f "$HOME/dotfiles/git/.gitconfig" ]; then cp -f "$HOME/dotfiles/git/.gitconfig" "$HOME/.gitconfig"; fi
 
-# Expose editor-friendly environment variable defaults
-ENV NVIM_CONFIG_DIR=/home/dev/.config/nvim
-ENV NVIM_REPO="${NVIM_REPO:-}"
-ENV NVIM_FORCE="${NVIM_FORCE:-0}"
+# Install OpenCode CLI AI Agent
+RUN curl -fsSL https://opencode.ai/install | bash
 
-# Switch back to root only to set permissions if needed (not required here),
-# then default to dev user for safety at runtime.
-USER dev
-
-ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 CMD [ "zsh" ]
