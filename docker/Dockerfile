@@ -20,8 +20,10 @@ ENV TZ=Etc/UTC \
 # Install minimal build deps
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+      build-essential \
       ca-certificates \
       curl \
+      fzf \
       gnupg \
       lsb-release \
       git \
