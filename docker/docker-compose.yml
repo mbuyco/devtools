@@ -1,0 +1,12 @@
+services:
+
+  devtools_container:
+    build:
+      context: .
+      args:
+        - IMAGE_AUTHOR=${IMAGE_AUTHOR}
+        - USER_UID=4200
+        - USER_GID=4200
+    env_file:
+      - .env
+
