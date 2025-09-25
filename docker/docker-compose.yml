@@ -17,3 +17,6 @@ services:
       - ${SSH_AUTH_SOCK}:/ssh-agent
       - dev_home:/home/dev
       - ${WORKSPACE_PATH:-/tmp}:/home/dev/workspace
+
+volumes:
+  dev_home:
