@@ -24,9 +24,10 @@ The Docker setup creates an Ubuntu-based container with essential development to
    ```
 
 3. Edit `docker/.env` and fill in the required variables:
-   - `IMAGE_AUTHOR`: Your name or identifier
-   - `NVIM_REPO`: URL to your Neovim configuration repository
-   - `DOTFILES_REPO`: URL to your dotfiles repository (see https://github.com/mbuyco/dotfiles for reference)
+    - `IMAGE_AUTHOR`: Your name or identifier
+    - `NVIM_REPO`: URL to your Neovim configuration repository
+    - `DOTFILES_REPO`: URL to your dotfiles repository (see https://github.com/mbuyco/dotfiles for reference)
+    - `WORKSPACE_PATH`: (Optional) Local path to mount as workspace in the container (defaults to /tmp)
 
 4. Ensure your SSH key is available (the script uses `~/.ssh/id_ed25519`).
 
@@ -39,12 +40,10 @@ This will build the Docker image and start the container with your development e
 
 ### macOS Local Setup
 
-Run the macOS installation script:
+Run the macOS installation script (ensure SSH keys are set up for GitHub cloning):
 ```bash
 ./mac-install-dev.sh
 ```
-
-Note: Ensure you have the proper SSH keys set up for cloning the repositories via SSH.
 
 This script will:
 - Install Homebrew (if not present)
