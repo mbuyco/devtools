@@ -7,8 +7,8 @@ services:
         - DOTFILES_REPO=${DOTFILES_REPO}
         - IMAGE_AUTHOR=${IMAGE_AUTHOR}
         - NVIM_REPO=${NVIM_REPO}
-        - USER_UID=4200
-        - USER_GID=4200
+        - USER_UID=${USER_UID:-4200}
+        - USER_GID=${USER_GID:-4200}
     env_file:
       - .env
     environment:
@@ -16,6 +16,4 @@ services:
     volumes:
       - ${SSH_AUTH_SOCK}:/ssh-agent
       - dev_home:/home/dev
-
-volumes:
-  dev_home:
+      - ${WORKSPACE_PATH:-/tmp}:/home/dev/workspace
