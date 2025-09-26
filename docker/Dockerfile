@@ -20,19 +20,21 @@ ENV TZ=Etc/UTC \
 # Install minimal build deps
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-      build-essential \
-      ca-certificates \
-      curl \
-      fzf \
-      gnupg \
-      lsb-release \
-      git \
-      sudo \
-      wget \
-      unzip \
-      ca-certificates \
-      locales \
-      procps \
+    build-essential \
+    ca-certificates \
+    curl \
+    fzf \
+    git \
+    gnupg \
+    locales \
+    lsb-release \
+    openssh-client \
+    procps \
+    sudo \
+    tmux \
+    unzip \
+    wget \
+    zsh \
   && rm -rf /var/lib/apt/lists/*
 
 # Set locale
@@ -53,20 +55,6 @@ RUN NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases \
   ln -s /usr/local/nvim-$VERSION/bin/nvim /usr/local/bin/nvim && \
   rm nvim-${ARCH}.tar.gz
 
-# Install essential runtime packages (zsh and tmux)
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    openssh-client \
-    zsh \
-    tmux \
-  && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js LTS (NodeSource) - supports both amd64 and arm64
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
-  && apt-get install -y --no-install-recommends nodejs \
-  && rm -rf /var/lib/apt/lists/*
-
 # Create non-root user 'dev' and setup directories
 RUN groupadd --gid ${USER_GID} dev || true \
   && useradd --create-home --uid ${USER_UID} --gid ${USER_GID} --shell /usr/bin/zsh dev \
@@ -74,10 +62,21 @@ RUN groupadd --gid ${USER_GID} dev || true \
   && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev-nopasswd \
   && chmod 0440 /etc/sudoers.d/dev-nopasswd
 
+# Switch to user 'dev'
 WORKDIR /home/dev
+USER dev
+
+# Install NodeJS (LTS) using NVM
+ENV NVM_DIR=/home/dev/.nvm
+RUN mkdir -p ${NVM_DIR} \
+  && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash \
+  && . $NVM_DIR/nvm.sh \
+  && nvm install --lts \
+  && nvm use --lts \
+  && nvm alias default 'lts/*' \
+  && npm install -g npm yarn
 
 # Install oh-my-zsh non-interactively for user dev, and set up basic zshrc
-USER dev
 ENV PATH="$HOME/.local/bin:$PATH"
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true \
   && git -C $HOME/.oh-my-zsh pull 2>/dev/null || true \
