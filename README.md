@@ -32,9 +32,9 @@ The Docker setup creates an Ubuntu-based container with essential development to
 4. Ensure your SSH key is available (the script uses `~/.ssh/id_ed25519`).
 
 5. Run the setup script:
-   ```bash
-   ./run.sh
-   ```
+    ```bash
+    docker/run.sh
+    ```
 
 This will build the Docker image and start the container with your development environment.
 
@@ -42,7 +42,7 @@ This will build the Docker image and start the container with your development e
 
 Run the macOS installation script (ensure SSH keys are set up for GitHub cloning):
 ```bash
-./mac-install-dev.sh
+scripts/mac-install-dev.sh
 ```
 
 This script will:
