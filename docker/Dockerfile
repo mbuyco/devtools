@@ -1,5 +1,5 @@
 # Default platform is `linux/arm64`
-FROM --platform=${BUILDPLATFORM:-linux/arm64} ubuntu:24.04
+FROM --platform=${BUILDPLATFORM:-linux/amd64} ubuntu:24.04
 
 ARG DEBIAN_FRONTEND
 ARG DOTFILES_REPO
@@ -67,6 +67,8 @@ WORKDIR /home/dev
 USER dev
 
 # Install NodeJS (LTS) using NVM
+SHELL ["/usr/bin/zsh", "-c"]
+
 ENV NVM_DIR=/home/dev/.nvm
 RUN mkdir -p ${NVM_DIR} \
   && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash \
